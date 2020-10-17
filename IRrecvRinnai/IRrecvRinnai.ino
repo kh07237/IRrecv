@@ -33,7 +33,7 @@ void LedOn(int color) //1:R 2:G 3:B
 {
   switch(color){
     case 1:
-      M5.dis.drawpix(0, 0x0000f0);
+      M5.dis.drawpix(0, 0x00f000);
       led_state = color;
       break;
     case 2:
@@ -41,7 +41,7 @@ void LedOn(int color) //1:R 2:G 3:B
       led_state = color;
       break;
     case 3:
-      M5.dis.drawpix(0, 0xf00000);
+      M5.dis.drawpix(0, 0x0000f0);
       led_state = color;
       break;
       
@@ -106,7 +106,7 @@ void loop(){
         //ボタン押下と同じ制御をする
         data[2] = 0;
         bButtonPressed = true;
-        state = 0;
+        //state = 0;
         break;
       }
     }
@@ -116,13 +116,21 @@ void loop(){
 	}while( len <= 0 );
 
   if(bButtonPressed){ //メインループの中でボタンが押されていたら
-      //OFF処理
-      Serial.println("ButtonPressed2\n");
-      digitalWrite(OUTLET, 0);
-      state = 0;
-      LedOff();
-      bButtonPressed = false;
-  
+      if(state == 2 || state == 1){//ONまたはOFF待ちならOFFへ
+        //OFF処理
+        Serial.println("Button-Off\n");
+        digitalWrite(OUTLET, 0);
+        state = 0;
+        LedOff();
+        bButtonPressed = false;
+      }else if(state == 0){ //OFFならONへ
+        //ON処理  
+        Serial.println("Button-On\n");
+        digitalWrite(OUTLET, 1);
+        state = 2;
+        LedOn(1);
+        bButtonPressed = false;
+      }
   }else{
     //IR受信コードに応じた処理
   	len8 = (byte)(len/8);
